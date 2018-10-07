@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React from 'react';
 import PropsTypes from 'prop-types';
 import _ from 'lodash';
 const Pagination = props => {
