@@ -1,35 +1,37 @@
 import React, { Component } from 'react';
 import { getMovies } from '../services/fakeMovieService';
 import { getGenres } from '../services/fakeGenreService';
-import Movie from './Movie';
 import Pagination from './common/Pagination';
 import { paginate } from '../utils/paginate';
 import ListGroup from './common/ListGroup';
+import MoviesTable from './moviesTable';
+import _ from 'lodash';
 
-class TableMovie extends Component {
+class Movies extends Component {
   constructor(props) {
     super(props);
     this.state = {
       movies: [],
-      headerTable: ['Title', 'Genre', 'Stock', 'Rate', 'liked', ''],
       pageSize: 4,
       currentPage: 1,
       genres: [],
-      selectedGenre: null
+      selectedGenre: null,
+      sortColumn: { path: 'title', order: 'asc' }
     };
   }
 
   componentDidMount() {
-    const genres = [{ name: 'All Genres' }, ...getGenres()];
+    const genres = [{ _id: '', name: 'All Genres' }, ...getGenres()];
     this.setState({ movies: getMovies(), genres });
   }
 
-  deletMovieHandle = movie => {
+  handleDelete = movie => {
     console.log('delete', movie);
     const movieList = [...this.state.movies];
     const movieListClear = movieList.filter(movieItem => movieItem !== movie);
     this.setState({ movies: movieListClear });
   };
+
   handleLike = movie => {
     let movieList = [...this.state.movies];
     movieList = movieList.map(movieItem => {
@@ -42,9 +44,14 @@ class TableMovie extends Component {
   handlePageChange = page => {
     this.setState({ currentPage: page });
   };
+
   handleGenreSelect = genre => {
     this.setState({ selectedGenre: genre, currentPage: 1 });
     console.log('genre', genre);
+  };
+
+  handleSort = sortColumn => {
+    this.setState({ sortColumn });
   };
 
   render() {
@@ -53,7 +60,8 @@ class TableMovie extends Component {
       pageSize,
       movies: allMovies,
       genres: allGenres,
-      selectedGenre
+      selectedGenre,
+      sortColumn
     } = this.state;
 
     const filtered =
@@ -61,7 +69,9 @@ class TableMovie extends Component {
         ? allMovies.filter(movie => movie.genre._id === selectedGenre._id)
         : allMovies;
 
-    const movies = paginate(filtered, currentPage, pageSize);
+    const sorted = _.orderBy(filtered, [sortColumn.path], [sortColumn.order]);
+
+    const movies = paginate(sorted, currentPage, pageSize);
 
     const movieMessage =
       filtered.length !== 0 ? (
@@ -82,28 +92,13 @@ class TableMovie extends Component {
             />
           </div>
           <div className="col">
-            <table className="table">
-              <thead>
-                <tr>
-                  {this.state.headerTable.map(header => (
-                    <th scope="col" key={header}>
-                      {' '}
-                      {header}{' '}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {movies.map(movie => (
-                  <Movie
-                    movie={movie}
-                    onDelete={() => this.deletMovieHandle(movie)}
-                    key={movie._id}
-                    onLike={() => this.handleLike(movie)}
-                  />
-                ))}
-              </tbody>
-            </table>
+            <MoviesTable
+              movies={movies}
+              sortColumn={sortColumn}
+              onLike={this.handleLike}
+              onDelete={this.handleDelete}
+              onSort={this.handleSort}
+            />
             <Pagination
               itemsCount={filtered.length}
               pageSize={pageSize}
@@ -117,4 +112,4 @@ class TableMovie extends Component {
   }
 }
 
-export default TableMovie;
+export default Movies;
