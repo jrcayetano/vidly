@@ -23,7 +23,7 @@ class MoviesTable extends Component {
       key: 'delete',
       content: movie => (
         <button
-          className="btn-danger btn-sm"
+          className="btn btn-danger btn-sm"
           onClick={() => this.props.onDelete(movie)}
         >
           Delete
