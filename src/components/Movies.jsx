@@ -94,6 +94,8 @@ class Movies extends Component {
       sortColumn
     } = this.state;
 
+    const { match, history } = this.props;
+
     return (
       <React.Fragment>
         <div className="row">
@@ -105,6 +107,12 @@ class Movies extends Component {
             />
           </div>
           <div className="col">
+            <button
+              className="btn btn-primary"
+              onClick={() => history.push(`${match.url}/new`)}
+            >
+              New Movie
+            </button>
             <p>Showing {totalCount} movies in the database</p>
             <MoviesTable
               movies={movies}
