@@ -67,25 +67,24 @@ class Movies extends Component {
       pageSize,
       movies: allMovies,
       selectedGenre,
+      searchQuery,
       sortColumn
     } = this.state;
 
-
-    const filtered =
-      selectedGenre && selectedGenre._id
-        ? allMovies.filter(movie => movie.genre._id === selectedGenre._id)
-        : allMovies;
+    let filtered = allMovies;
+    if(searchQuery) {
+      filtered = allMovies.filter(movie => movie.title.toLowerCase().startsWith(searchQuery.toLowerCase()));
+    }
+    else if (selectedGenre && selectedGenre._id) {
+      filtered = allMovies.filter(movie => movie.genre._id === selectedGenre._id)
+    }
+    
 
     const sorted = _.orderBy(filtered, [sortColumn.path], [sortColumn.order]);
 
     const movies = paginate(sorted, currentPage, pageSize);
 
-    // const movieMessage =
-    //   filtered.length !== 0 ? (
-    //     <p>Showing {filtered.length} movies in the database</p>
-    //   ) : (
-    //     <p>There is not movie on database</p>
-    //   );
+  
 
     return { totalCount: filtered.length, data: movies };
   };
