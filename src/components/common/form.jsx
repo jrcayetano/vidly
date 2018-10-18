@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import Joi from 'joi-browser';
 import Input from './input';
-import Dropdown from './dropDown';
+import Select from './select';
 class Form extends Component {
   state = {
     data: {},
@@ -70,16 +70,17 @@ class Form extends Component {
       />
     );
   }
-  renderDropdown(name, label, list = []) {
+  renderSelect(name, label, options) {
     const { data, errors } = this.state;
     return (
-      <Dropdown
+      <Select
         name={name}
         value={data[name]}
         label={label}
-        list={list}
-        error={errors[name]}
+        options={options}
         onChange={this.handleChange}
+        error={errors[name]}
+       
       />
     );
   }

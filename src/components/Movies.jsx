@@ -6,6 +6,8 @@ import { paginate } from '../utils/paginate';
 import ListGroup from './common/ListGroup';
 import MoviesTable from './moviesTable';
 import _ from 'lodash';
+import {Link} from 'react-router-dom';
+import SearchBox from './common/searchBox'
 
 class Movies extends Component {
   constructor(props) {
@@ -14,6 +16,7 @@ class Movies extends Component {
       movies: [],
       pageSize: 4,
       currentPage: 1,
+      searchQuery: '',
       genres: [],
       selectedGenre: null,
       sortColumn: { path: 'title', order: 'asc' }
@@ -54,6 +57,10 @@ class Movies extends Component {
     this.setState({ sortColumn });
   };
 
+  handleSearch = query => {
+    this.setState( {searchQuery: query, selectedGenre: null, currentpage: 1} )
+  }
+
   getPageData = () => {
     const {
       currentPage,
@@ -62,6 +69,7 @@ class Movies extends Component {
       selectedGenre,
       sortColumn
     } = this.state;
+
 
     const filtered =
       selectedGenre && selectedGenre._id
@@ -91,7 +99,8 @@ class Movies extends Component {
       movies: allMovies,
       genres: allGenres,
       selectedGenre,
-      sortColumn
+      sortColumn,
+      searchQuery
     } = this.state;
 
     const { match, history } = this.props;
@@ -107,13 +116,15 @@ class Movies extends Component {
             />
           </div>
           <div className="col">
-            <button
+            <Link
+              to="/movies/new"
               className="btn btn-primary"
-              onClick={() => history.push(`${match.url}/new`)}
+              style={{ marginBottom: 20}}
             >
               New Movie
-            </button>
+            </Link>
             <p>Showing {totalCount} movies in the database</p>
+            <SearchBox value={searchQuery} onChange={this.handleSearch} />
             <MoviesTable
               movies={movies}
               sortColumn={sortColumn}

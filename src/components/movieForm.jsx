@@ -2,9 +2,11 @@ import React from 'react';
 import Form from './common/form';
 import Joi from 'joi-browser';
 import { getGenres } from '../services/fakeGenreService';
+import { saveMovie, getMovie } from '../services/fakeMovieService';
 class MoviesForm extends Form {
   state = {
-    data: { title: '', genre: '', numberInStock: '', dailyRentalRate: '' },
+    data: { title: '', genreId: '', numberInStock: '', dailyRentalRate: '' },
+    genres: [],
     errors: {},
     list: []
   };
@@ -12,34 +14,55 @@ class MoviesForm extends Form {
     super(props);
   }
 
-  componentDidMount() {
-    this.setState({ list: getGenres() });
-  }
+ 
 
   schema = {
+    _id: Joi.string(),
     title: Joi.string()
       .required()
       .label('Title'),
-    genre: Joi.string()
+    genreId: Joi.string()
       .required()
       .label('Genre'),
     numberInStock: Joi.number()
-      .min(1)
+      .min(0)
       .max(100)
       .required()
       .label('Number in stock'),
     dailyRentalRate: Joi.number()
-      .min(1)
+      .min(0)
       .max(5)
       .required()
       .label('Rate')
   };
 
+  componentDidMount() {
+    const genres = getGenres();
+    this.setState({ genres });
+
+    const movieId = this.props.match.params.id;
+    if(movieId === 'new') return;
+
+    const movie = getMovie(movieId);
+    if(!movie) return this.props.history.replace('/not-found');
+
+    this.setState({ data: this.mapToViewModel(movie) })
+  }
+
+  mapToViewModel(movie) {
+    return {
+      _id: movie._id,
+      title: movie.title,
+      genreId: movie.genre_id,
+      numberInStock: movie.numberInStock,
+      dailyRentalRate: movie.dailyRentalRate
+    };
+  }
+
   doSubmit = () => {
-    const { history } = this.props;
-    history.push('/movies');
-    //  const username = this.username.current.value;
-    console.log('submitted');
+    saveMovie(this.state.data);
+    
+    this.props.history.push('/movies');
   };
 
   render() {
@@ -50,7 +73,7 @@ class MoviesForm extends Form {
         <h1>Movies Form {match.params.id}</h1>
         <form onSubmit={this.handleSubmit}>
           {this.renderInput('title', 'Title')}
-          {this.renderDropdown('genre', 'Genre', this.state.list)}
+          {this.renderSelect('genreId', 'Genre', this.state.genres)}
           {this.renderInput('numberInStock', 'Number in stock', 'number')}
           {this.renderInput('dailyRentalRate', 'Rate', 'number')}
           {this.renderButton('Save')}
